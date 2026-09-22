@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Node / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Java / Maven
+backend/target/
+
+# Local Spring configuration
+backend/src/main/resources/application.properties
+backend/src/main/resources/application.properties.save
+
+# IDE
+.vscode/
+.idea/
