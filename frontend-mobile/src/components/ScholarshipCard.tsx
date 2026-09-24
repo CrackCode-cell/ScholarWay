@@ -1,6 +1,13 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { router } from 'expo-router';
+
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+} from 'react-native';
 
 interface ScholarshipCardProps {
+  scholarshipId: number;
   name: string;
   provider: string;
   awardAmount: number;
@@ -8,18 +15,27 @@ interface ScholarshipCardProps {
 }
 
 export default function ScholarshipCard({
+  scholarshipId,
   name,
   provider,
   awardAmount,
   deadline,
 }: ScholarshipCardProps) {
   return (
-    <View style={styles.card}>
+    <Pressable
+      style={styles.card}
+      onPress={() => {
+        router.push(`/scholarship/${scholarshipId}`);
+      }}
+    >
       <Text style={styles.name}>{name}</Text>
+
       <Text>{provider}</Text>
+
       <Text>${awardAmount}</Text>
+
       <Text>Deadline: {deadline}</Text>
-    </View>
+    </Pressable>
   );
 }
 

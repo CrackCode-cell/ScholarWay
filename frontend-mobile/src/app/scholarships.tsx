@@ -1,23 +1,5 @@
-/**
- * ScholarWay - Scholarships Screen
- *
- * Purpose:
- * Displays scholarships, provides scholarship search functionality,
- * and renders reusable ScholarshipCard components.
- *
- * Current implementation:
- * - Uses temporary hardcoded scholarship data.
- * - Stores search text with React state.
- * - Filters scholarships based on the user's search.
- * - Uses reusable SearchBar and ScholarshipCard components.
- *
- * Planned implementation:
- * - Replace hardcoded data with the Spring Boot REST API.
- * - Add loading and error states.
- * - Eventually support navigation to scholarship details.
- */
-
 import { useState } from 'react';
+
 import {
   ScrollView,
   StyleSheet,
@@ -28,14 +10,8 @@ import SearchBar from '@/components/SearchBar';
 import ScholarshipCard from '@/components/ScholarshipCard';
 
 export default function ScholarshipsScreen() {
-  // Stores the text currently entered into the search bar.
   const [searchText, setSearchText] = useState('');
 
-  /*
-   * Temporary scholarship data used while building the frontend.
-   * This will eventually be replaced by data returned by
-   * the ScholarWay Spring Boot API.
-   */
   const scholarships = [
     {
       scholarshipId: 1,
@@ -60,12 +36,10 @@ export default function ScholarshipsScreen() {
     },
   ];
 
-  /*
-   * Filters scholarships based on the user's search text.
-   * toLowerCase() makes the search case-insensitive.
-   */
   const filteredScholarships = scholarships.filter((scholarship) =>
-    scholarship.name.toLowerCase().includes(searchText.toLowerCase())
+    scholarship.name
+      .toLowerCase()
+      .includes(searchText.toLowerCase())
   );
 
   return (
@@ -76,19 +50,15 @@ export default function ScholarshipsScreen() {
         Find scholarships that fit your profile.
       </Text>
 
-      {/* Reusable search component controlled by parent state. */}
       <SearchBar
         searchText={searchText}
         onSearchChange={setSearchText}
       />
 
-      {/*
-       * Create one ScholarshipCard for every scholarship
-       * that matches the current search.
-       */}
       {filteredScholarships.map((scholarship) => (
         <ScholarshipCard
           key={scholarship.scholarshipId}
+          scholarshipId={scholarship.scholarshipId}
           name={scholarship.name}
           provider={scholarship.provider}
           awardAmount={scholarship.awardAmount}
