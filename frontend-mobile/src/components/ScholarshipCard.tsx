@@ -6,35 +6,37 @@ import {
   Text,
 } from 'react-native';
 
+import { Scholarship } from '@/types/Scholarship';
+
 interface ScholarshipCardProps {
-  scholarshipId: number;
-  name: string;
-  provider: string;
-  awardAmount: number;
-  deadline: string;
+  scholarship: Scholarship;
 }
 
 export default function ScholarshipCard({
-  scholarshipId,
-  name,
-  provider,
-  awardAmount,
-  deadline,
+  scholarship,
 }: ScholarshipCardProps) {
   return (
     <Pressable
       style={styles.card}
       onPress={() => {
-        router.push(`/scholarship/${scholarshipId}`);
+        router.push(
+          `/scholarship/${scholarship.scholarshipId}`
+        );
       }}
     >
-      <Text style={styles.name}>{name}</Text>
+      <Text style={styles.name}>
+        {scholarship.name}
+      </Text>
 
-      <Text>{provider}</Text>
+      <Text>{scholarship.provider}</Text>
 
-      <Text>${awardAmount}</Text>
+      <Text>
+        ${scholarship.awardAmount.toLocaleString()}
+      </Text>
 
-      <Text>Deadline: {deadline}</Text>
+      <Text>
+        Deadline: {scholarship.deadline}
+      </Text>
     </Pressable>
   );
 }

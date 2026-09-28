@@ -1,6 +1,6 @@
-import { useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -8,33 +8,30 @@ import {
 
 import SearchBar from '@/components/SearchBar';
 import ScholarshipCard from '@/components/ScholarshipCard';
+import { Scholarship } from '@/types/Scholarship';
+import { getScholarships } from '@/services/scholarshipService';
 
 export default function ScholarshipsScreen() {
   const [searchText, setSearchText] = useState('');
+  const [scholarships, setScholarships] = useState<Scholarship[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const scholarships = [
-    {
-      scholarshipId: 1,
-      name: 'Future Leaders Scholarship',
-      provider: 'Example Foundation',
-      awardAmount: 5000,
-      deadline: 'March 15, 2027',
-    },
-    {
-      scholarshipId: 2,
-      name: 'STEM Excellence Award',
-      provider: 'STEM Foundation',
-      awardAmount: 2500,
-      deadline: 'April 1, 2027',
-    },
-    {
-      scholarshipId: 3,
-      name: 'Community Impact Scholarship',
-      provider: 'Community Foundation',
-      awardAmount: 3000,
-      deadline: 'May 10, 2027',
-    },
-  ];
+  useEffect(() => {
+    async function fetchScholarships() {
+      try {
+        const data = await getScholarships();
+
+        setScholarships(data);
+      } catch (error) {
+        setError('Unable to load scholarships.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchScholarships();
+  }, []);
 
   const filteredScholarships = scholarships.filter((scholarship) =>
     scholarship.name
@@ -55,16 +52,22 @@ export default function ScholarshipsScreen() {
         onSearchChange={setSearchText}
       />
 
-      {filteredScholarships.map((scholarship) => (
-        <ScholarshipCard
-          key={scholarship.scholarshipId}
-          scholarshipId={scholarship.scholarshipId}
-          name={scholarship.name}
-          provider={scholarship.provider}
-          awardAmount={scholarship.awardAmount}
-          deadline={scholarship.deadline}
-        />
-      ))}
+      {loading && (
+        <ActivityIndicator size="large" />
+      )}
+
+      {error !== '' && (
+        <Text style={styles.error}>{error}</Text>
+      )}
+
+      {!loading &&
+        error === '' &&
+        filteredScholarships.map((scholarship) => (
+          <ScholarshipCard
+            key={scholarship.scholarshipId}
+            scholarship={scholarship}
+          />
+        ))}
     </ScrollView>
   );
 }
@@ -84,5 +87,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 8,
     marginBottom: 16,
+  },
+
+  error: {
+    fontSize: 16,
+    marginTop: 20,
   },
 });
