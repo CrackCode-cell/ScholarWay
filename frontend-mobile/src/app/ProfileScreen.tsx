@@ -9,13 +9,15 @@ import {
   TextInput,
 } from 'react-native';
 
+import { createStudent } from '@/services/studentService';
+
 export default function ProfileScreen() {
   const [name, setName] = useState('');
   const [gpa, setGpa] = useState('');
   const [major, setMajor] = useState('');
   const [interests, setInterests] = useState('');
 
-  function handleSaveProfile() {
+  async function handleSaveProfile() {
     if (name.trim() === '') {
       Alert.alert(
         'Error',
@@ -38,18 +40,34 @@ export default function ProfileScreen() {
       return;
     }
 
-    Alert.alert(
-      'Profile Saved',
-      `Name: ${name}\nGPA: ${gpa}\nMajor: ${major}\nInterests: ${interests}`
-    );
+    try {
+      const student = await createStudent({
+        name,
+        gpa: gpaNumber,
+        major,
+        interests,
+      });
+
+      Alert.alert(
+        'Profile Saved',
+        `Welcome, ${student.name}!`
+      );
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'Unable to save your profile.'
+      );
+    }
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Student Profile</Text>
+      <Text style={styles.title}>
+        Student Profile
+      </Text>
 
       <Text style={styles.subtitle}>
-        Tell ScholarWay about yourself so we can eventually
+        Tell ScholarWay about yourself so we can
         personalize your scholarship matches.
       </Text>
 
