@@ -13,12 +13,13 @@ public class Student {
     private Long studentId;
 
     private String name;
-
     private Double gpa;
-
     private String major;
-
     private String interests;
+    private String location;
+    private Boolean financialNeed;
+    private Boolean fafsaCompleted;
+    private String activities;
 
     public Student() {
     }
@@ -27,12 +28,20 @@ public class Student {
             String name,
             Double gpa,
             String major,
-            String interests) {
+            String interests,
+            String location,
+            Boolean financialNeed,
+            Boolean fafsaCompleted,
+            String activities) {
 
         this.name = name;
         this.gpa = gpa;
         this.major = major;
         this.interests = interests;
+        this.location = location;
+        this.financialNeed = financialNeed;
+        this.fafsaCompleted = fafsaCompleted;
+        this.activities = activities;
     }
 
     public Long getStudentId() {
@@ -69,5 +78,37 @@ public class Student {
 
     public void setInterests(String interests) {
         this.interests = interests;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public Boolean getFinancialNeed() {
+        return financialNeed;
+    }
+
+    public void setFinancialNeed(Boolean financialNeed) {
+        this.financialNeed = financialNeed;
+    }
+
+    public Boolean getFafsaCompleted() {
+        return fafsaCompleted;
+    }
+
+    public void setFafsaCompleted(Boolean fafsaCompleted) {
+        this.fafsaCompleted = fafsaCompleted;
+    }
+
+    public String getActivities() {
+        return activities;
+    }
+
+    public void setActivities(String activities) {
+        this.activities = activities;
     }
 }

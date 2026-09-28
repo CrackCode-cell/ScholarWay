@@ -10,10 +10,19 @@ public class StudentService {
     public StudentService(
             StudentRepository studentRepository) {
 
-        this.studentRepository = studentRepository;
+        this.studentRepository =
+                studentRepository;
     }
 
     public Student createStudent(Student student) {
+
         return studentRepository.save(student);
+    }
+
+    public Student getStudent(Long studentId) {
+
+        return studentRepository
+                .findById(studentId)
+                .orElseThrow();
     }
 }

@@ -4,4 +4,8 @@ export interface Student {
   gpa: number;
   major: string;
   interests: string;
+  location: string;
+  financialNeed: boolean;
+  fafsaCompleted: boolean;
+  activities: string;
 }
