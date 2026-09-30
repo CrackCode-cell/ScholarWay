@@ -1,75 +1,247 @@
 package com.scholarway.matching;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.scholarway.scholarship.Scholarship;
+import com.scholarway.scholarship.ScholarshipRequirements;
+import com.scholarway.scholarship.ScholarshipService;
+import com.scholarway.student.Student;
+import com.scholarway.student.StudentService;
 
 import org.springframework.stereotype.Service;
 
-import com.scholarway.scholarship.Scholarship;
-import com.scholarway.scholarship.ScholarshipRepository;
-import com.scholarway.scholarship.ScholarshipRequirements;
-import com.scholarway.student.Student;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class MatchingService {
 
-    private final ScholarshipRepository scholarshipRepository;
+    private final StudentService studentService;
+    private final ScholarshipService scholarshipService;
     private final EligibilityService eligibilityService;
 
     public MatchingService(
-            ScholarshipRepository scholarshipRepository,
-            EligibilityService eligibilityService) {
-
-        this.scholarshipRepository =
-                scholarshipRepository;
-
-        this.eligibilityService =
-                eligibilityService;
+            StudentService studentService,
+            ScholarshipService scholarshipService,
+            EligibilityService eligibilityService
+    ) {
+        this.studentService = studentService;
+        this.scholarshipService = scholarshipService;
+        this.eligibilityService = eligibilityService;
     }
 
-    public int calculateMatchScore(
+    public List<MatchingResult> getMatchesForStudent(
+            Long studentId
+    ) {
+        Student student =
+                studentService.getStudent(studentId);
+
+        List<Scholarship> scholarships =
+                scholarshipService.getAllScholarships();
+
+        List<MatchingResult> results =
+                new ArrayList<>();
+
+        for (Scholarship scholarship : scholarships) {
+
+            ScholarshipRequirements requirements =
+                    scholarship.getRequirements();
+
+            boolean eligible =
+                    eligibilityService.isEligible(
+                            student,
+                            requirements
+                    );
+
+            boolean gpaMatch =
+                    checkGpa(student, requirements);
+
+            boolean majorMatch =
+                    checkMajor(student, requirements);
+
+            boolean locationMatch =
+                    checkLocation(student, requirements);
+
+            boolean financialNeedMatch =
+                    checkFinancialNeed(
+                            student,
+                            requirements
+                    );
+
+            boolean fafsaMatch =
+                    checkFafsa(
+                            student,
+                            requirements
+                    );
+
+            boolean activitiesMatch =
+                    checkActivity(
+                            student,
+                            requirements
+                    );
+
+            int score = 0;
+
+            if (gpaMatch) {
+                score += 20;
+            }
+
+            if (majorMatch) {
+                score += 20;
+            }
+
+            if (locationMatch) {
+                score += 15;
+            }
+
+            if (financialNeedMatch) {
+                score += 20;
+            }
+
+            if (fafsaMatch) {
+                score += 10;
+            }
+
+            if (activitiesMatch) {
+                score += 15;
+            }
+
+            String label =
+                    getLabel(score);
+
+            results.add(
+                    new MatchingResult(
+                            scholarship.getScholarshipId(),
+                            scholarship.getName(),
+                            eligible,
+                            score,
+                            label,
+                            gpaMatch,
+                            majorMatch,
+                            locationMatch,
+                            financialNeedMatch,
+                            fafsaMatch,
+                            activitiesMatch
+                    )
+            );
+        }
+
+        return results;
+    }
+
+    private boolean checkGpa(
             Student student,
-            ScholarshipRequirements requirements) {
-
-        int score = 0;
-
-        if (student.getGpa() >= requirements.getMinimumGpa()) {
-            score += 20;
+            ScholarshipRequirements requirements
+    ) {
+        if (requirements == null ||
+                requirements.getMinimumGpa() == null) {
+            return true;
         }
 
-        if (student.getMajor()
-                .equalsIgnoreCase(requirements.getMajor())) {
-            score += 20;
+        if (student.getGpa() == null) {
+            return false;
         }
 
-        if (student.getLocation()
-                .equalsIgnoreCase(requirements.getLocation())) {
-            score += 15;
+        return student.getGpa()
+                >= requirements.getMinimumGpa();
+    }
+
+    private boolean checkMajor(
+            Student student,
+            ScholarshipRequirements requirements
+    ) {
+        if (requirements == null ||
+                requirements.getMajor() == null ||
+                requirements.getMajor().isBlank()) {
+            return true;
         }
 
-        if (!requirements.getFinancialNeedRequired()
-                || student.getFinancialNeed()) {
-            score += 20;
+        if (student.getMajor() == null) {
+            return false;
         }
 
-        if (!requirements.getFafsaRequired()
-                || student.getFafsaCompleted()) {
-            score += 10;
+        return student.getMajor()
+                .equalsIgnoreCase(
+                        requirements.getMajor()
+                );
+    }
+
+    private boolean checkLocation(
+            Student student,
+            ScholarshipRequirements requirements
+    ) {
+        if (requirements == null ||
+                requirements.getLocation() == null ||
+                requirements.getLocation().isBlank()) {
+            return true;
         }
 
-        if (student.getActivities()
+        if (student.getLocation() == null) {
+            return false;
+        }
+
+        return student.getLocation()
+                .equalsIgnoreCase(
+                        requirements.getLocation()
+                );
+    }
+
+    private boolean checkFinancialNeed(
+            Student student,
+            ScholarshipRequirements requirements
+    ) {
+        if (requirements == null ||
+                requirements.getFinancialNeedRequired()
+                        == null ||
+                !requirements.getFinancialNeedRequired()) {
+            return true;
+        }
+
+        return Boolean.TRUE.equals(
+                student.getFinancialNeed()
+        );
+    }
+
+    private boolean checkFafsa(
+            Student student,
+            ScholarshipRequirements requirements
+    ) {
+        if (requirements == null ||
+                requirements.getFafsaRequired()
+                        == null ||
+                !requirements.getFafsaRequired()) {
+            return true;
+        }
+
+        return Boolean.TRUE.equals(
+                student.getFafsaCompleted()
+        );
+    }
+
+    private boolean checkActivity(
+            Student student,
+            ScholarshipRequirements requirements
+    ) {
+        if (requirements == null ||
+                requirements.getRequiredActivity()
+                        == null ||
+                requirements.getRequiredActivity()
+                        .isBlank()) {
+            return true;
+        }
+
+        if (student.getActivities() == null) {
+            return false;
+        }
+
+        return student.getActivities()
                 .toLowerCase()
                 .contains(
                         requirements
                                 .getRequiredActivity()
-                                .toLowerCase())) {
-            score += 15;
-        }
-
-        return score;
+                                .toLowerCase()
+                );
     }
 
-    public String getMatchLabel(int score) {
+    private String getLabel(int score) {
 
         if (score >= 95) {
             return "Excellent";
@@ -84,46 +256,5 @@ public class MatchingService {
         }
 
         return "Low";
-    }
-
-    public List<MatchingResult> getMatchesForStudent(
-            Student student) {
-
-        List<Scholarship> scholarships =
-                scholarshipRepository.findAll();
-
-        List<MatchingResult> results =
-                new ArrayList<>();
-
-        for (Scholarship scholarship : scholarships) {
-
-            ScholarshipRequirements requirements =
-                    scholarship.getRequirements();
-
-            boolean eligible =
-                    eligibilityService.isEligible(
-                            student,
-                            requirements);
-
-            int score =
-                    calculateMatchScore(
-                            student,
-                            requirements);
-
-            String label =
-                    getMatchLabel(score);
-
-            MatchingResult result =
-                    new MatchingResult(
-                            scholarship.getScholarshipId(),
-                            scholarship.getName(),
-                            eligible,
-                            score,
-                            label);
-
-            results.add(result);
-        }
-
-        return results;
     }
 }

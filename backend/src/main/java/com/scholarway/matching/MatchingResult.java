@@ -8,64 +8,80 @@ public class MatchingResult {
     private int score;
     private String label;
 
-    public MatchingResult() {
-    }
+    private boolean gpaMatch;
+    private boolean majorMatch;
+    private boolean locationMatch;
+    private boolean financialNeedMatch;
+    private boolean fafsaMatch;
+    private boolean activitiesMatch;
 
     public MatchingResult(
             Long scholarshipId,
             String scholarshipName,
             boolean eligible,
             int score,
-            String label) {
-
+            String label,
+            boolean gpaMatch,
+            boolean majorMatch,
+            boolean locationMatch,
+            boolean financialNeedMatch,
+            boolean fafsaMatch,
+            boolean activitiesMatch
+    ) {
         this.scholarshipId = scholarshipId;
         this.scholarshipName = scholarshipName;
         this.eligible = eligible;
         this.score = score;
         this.label = label;
+        this.gpaMatch = gpaMatch;
+        this.majorMatch = majorMatch;
+        this.locationMatch = locationMatch;
+        this.financialNeedMatch = financialNeedMatch;
+        this.fafsaMatch = fafsaMatch;
+        this.activitiesMatch = activitiesMatch;
     }
 
     public Long getScholarshipId() {
         return scholarshipId;
     }
 
-    public void setScholarshipId(
-            Long scholarshipId) {
-
-        this.scholarshipId = scholarshipId;
-    }
-
     public String getScholarshipName() {
         return scholarshipName;
-    }
-
-    public void setScholarshipName(
-            String scholarshipName) {
-
-        this.scholarshipName = scholarshipName;
     }
 
     public boolean isEligible() {
         return eligible;
     }
 
-    public void setEligible(boolean eligible) {
-        this.eligible = eligible;
-    }
-
     public int getScore() {
         return score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
     }
 
     public String getLabel() {
         return label;
     }
 
-    public void setLabel(String label) {
-        this.label = label;
+    public boolean isGpaMatch() {
+        return gpaMatch;
+    }
+
+    public boolean isMajorMatch() {
+        return majorMatch;
+    }
+
+    public boolean isLocationMatch() {
+        return locationMatch;
+    }
+
+    public boolean isFinancialNeedMatch() {
+        return financialNeedMatch;
+    }
+
+    public boolean isFafsaMatch() {
+        return fafsaMatch;
+    }
+
+    public boolean isActivitiesMatch() {
+        return activitiesMatch;
     }
 }
