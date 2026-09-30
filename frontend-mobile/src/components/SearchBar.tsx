@@ -1,29 +1,68 @@
-import { StyleSheet, TextInput } from 'react-native';
+import {
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 interface SearchBarProps {
-  searchText: string;
-  onSearchChange: (text: string) => void;
+  value: string;
+  onChangeText: (text: string) => void;
+  onSearch: () => void;
 }
 
 export default function SearchBar({
-  searchText,
-  onSearchChange,
+  value,
+  onChangeText,
+  onSearch,
 }: SearchBarProps) {
   return (
-    <TextInput
-      style={styles.input}
-      value={searchText}
-      onChangeText={onSearchChange}
-      placeholder="Search scholarships..."
-    />
+    <View style={styles.container}>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder="Search scholarships..."
+        style={styles.input}
+        returnKeyType="search"
+        onSubmitEditing={onSearch}
+      />
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={onSearch}
+      >
+        <View>
+          <View style={styles.buttonLine} />
+          <View style={styles.buttonLine} />
+        </View>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  input: {
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderRadius: 10,
+    marginBottom: 18,
+  },
+
+  input: {
+    flex: 1,
     padding: 12,
-    marginBottom: 16,
+    fontSize: 16,
+  },
+
+  button: {
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+
+  buttonLine: {
+    width: 18,
+    height: 2,
+    marginVertical: 2,
   },
 });

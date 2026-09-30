@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 import ScholarshipCard from '../components/ScholarshipCard';
+import SearchBar from '../components/SearchBar';
 
 import {
   getScholarships,
@@ -63,16 +64,34 @@ export default function ScholarshipsScreen() {
       setLoading(true);
       setError('');
 
-      if (!searchText.trim()) {
-        await loadScholarships();
+      const trimmedSearch =
+        searchText.trim();
+
+      if (!trimmedSearch) {
+        await handleTypeFilter(
+          selectedType,
+          false
+        );
         return;
       }
 
-      const data = await searchScholarships(
-        searchText.trim()
+      const data =
+        await searchScholarships(
+          trimmedSearch
+        );
+
+      if (selectedType === 'ALL') {
+        setScholarships(data);
+        return;
+      }
+
+      const filtered = data.filter(
+        (scholarship) =>
+          scholarship.scholarshipType ===
+          selectedType
       );
 
-      setScholarships(data);
+      setScholarships(filtered);
     } catch (error) {
       setError(
         'Unable to search scholarships.'
@@ -83,28 +102,64 @@ export default function ScholarshipsScreen() {
   }
 
   async function handleTypeFilter(
-    type: string
+    type: string,
+    showLoading = true
   ) {
     try {
       setSelectedType(type);
-      setLoading(true);
+
+      if (showLoading) {
+        setLoading(true);
+      }
+
       setError('');
 
-      if (type === 'ALL') {
-        await loadScholarships();
+      if (
+        type === 'ALL' &&
+        !searchText.trim()
+      ) {
+        const data =
+          await getScholarships();
+
+        setScholarships(data);
+        return;
+      }
+
+      if (
+        type !== 'ALL' &&
+        !searchText.trim()
+      ) {
+        const data =
+          await getScholarshipsByType(type);
+
+        setScholarships(data);
         return;
       }
 
       const data =
-        await getScholarshipsByType(type);
+        await searchScholarships(
+          searchText.trim()
+        );
 
-      setScholarships(data);
+      if (type === 'ALL') {
+        setScholarships(data);
+      } else {
+        setScholarships(
+          data.filter(
+            (scholarship) =>
+              scholarship.scholarshipType ===
+              type
+          )
+        );
+      }
     } catch (error) {
       setError(
         'Unable to filter scholarships.'
       );
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   }
 
@@ -135,17 +190,15 @@ export default function ScholarshipsScreen() {
       </Text>
 
       <Text style={styles.subtitle}>
-        Find scholarships that fit your profile.
+        Find scholarships that fit your
+        interests and profile.
       </Text>
 
-      <View style={styles.searchContainer}>
-        <Text
-          style={styles.searchText}
-          onPress={handleSearch}
-        >
-          Search: {searchText || 'Tap to search'}
-        </Text>
-      </View>
+      <SearchBar
+        value={searchText}
+        onChangeText={setSearchText}
+        onSearch={handleSearch}
+      />
 
       <Text style={styles.filterTitle}>
         Scholarship Type
@@ -194,7 +247,8 @@ export default function ScholarshipsScreen() {
         <TouchableOpacity
           style={[
             styles.filterButton,
-            selectedType === 'MERIT_AND_NEED' &&
+            selectedType ===
+              'MERIT_AND_NEED' &&
               styles.selectedFilter,
           ]}
           onPress={() =>
@@ -248,18 +302,8 @@ const styles = StyleSheet.create({
 
   subtitle: {
     fontSize: 15,
+    lineHeight: 22,
     marginBottom: 18,
-  },
-
-  searchContainer: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 18,
-  },
-
-  searchText: {
-    fontSize: 16,
   },
 
   filterTitle: {
