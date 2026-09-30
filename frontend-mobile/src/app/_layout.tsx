@@ -1,18 +1,63 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { Stack } from 'expo-router';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
-
-SplashScreen.preventAutoHideAsync();
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <Stack>
+      <Stack.Screen
+        name="index"
+        options={{
+          title: 'ScholarWay',
+        }}
+      />
+
+      <Stack.Screen
+        name="dashboard"
+        options={{
+          title: 'Dashboard',
+        }}
+      />
+
+      <Stack.Screen
+        name="scholarships"
+        options={{
+          title: 'Scholarships',
+        }}
+      />
+
+      <Stack.Screen
+        name="matches"
+        options={{
+          title: 'Matches',
+        }}
+      />
+
+      <Stack.Screen
+        name="saved"
+        options={{
+          title: 'Saved Scholarships',
+        }}
+      />
+
+      <Stack.Screen
+        name="applications"
+        options={{
+          title: 'Applications',
+        }}
+      />
+
+      <Stack.Screen
+        name="ProfileScreen"
+        options={{
+          title: 'Profile',
+        }}
+      />
+
+      <Stack.Screen
+        name="scholarship/[id]"
+        options={{
+          title: 'Scholarship Details',
+        }}
+      />
+    </Stack>
   );
 }

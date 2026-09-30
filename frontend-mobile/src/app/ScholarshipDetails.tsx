@@ -1,119 +1,147 @@
-/**
- * ScholarWay - Scholarship Details Screen
- *
- * Purpose:
- * Displays detailed information about a selected scholarship.
- *
- * Current implementation:
- * - Receives scholarship information through props.
- * - Displays the scholarship name, provider, award amount,
- *   deadline, and description.
- * - Uses a button for a future "Save Scholarship" action.
- * - Does NOT yet use navigation or the backend.
- *
- * Planned implementation:
- * - Connect this screen to Expo Router navigation.
- * - Pass a scholarship ID through navigation.
- * - Retrieve the selected scholarship from the backend.
- * - Add Save Scholarship functionality.
- * - Add an Apply button that opens the scholarship application.
- */
+import { useState } from 'react';
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
-import { Alert, Button, ScrollView, StyleSheet, Text } from 'react-native';
+import { saveScholarship } from '../services/savedScholarshipService';
+import { createApplication } from '../services/applicationService';
+import { Scholarship } from '../types/Scholarship';
 
-/*
- * TypeScript blueprint describing the information
- * that this component expects from its parent.
- */
 interface ScholarshipDetailsProps {
-  scholarshipId: number;
-  name: string;
-  provider: string;
-  awardAmount: number;
-  deadline: string;
-  description: string;
+  scholarship: Scholarship;
 }
 
-/*
- * ScholarshipDetails receives scholarship information
- * through props.
- */
 export default function ScholarshipDetails({
-  scholarshipId,
-  name,
-  provider,
-  awardAmount,
-  deadline,
-  description,
+  scholarship,
 }: ScholarshipDetailsProps) {
-  /*
-   * Temporary save handler.
-   *
-   * Later, this will send a request to the backend
-   * to save the scholarship for the current student.
-   */
-  function handleSaveScholarship() {
-    Alert.alert(
-      'Scholarship Saved',
-      `${name} has been added to your saved scholarships.`
-    );
+  const [saving, setSaving] = useState(false);
+  const [tracking, setTracking] = useState(false);
+
+  const studentId = 1;
+
+  async function handleSave() {
+    try {
+      setSaving(true);
+
+      await saveScholarship(
+        studentId,
+        scholarship.scholarshipId
+      );
+
+      Alert.alert(
+        'Scholarship Saved',
+        `${scholarship.name} has been saved.`
+      );
+    } catch (error) {
+      Alert.alert(
+        'Unable to Save',
+        'We could not save this scholarship right now.'
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleTrackApplication() {
+    try {
+      setTracking(true);
+
+      await createApplication(
+        studentId,
+        scholarship.scholarshipId
+      );
+
+      Alert.alert(
+        'Application Added',
+        `${scholarship.name} is now in your application tracker.`
+      );
+    } catch (error) {
+      Alert.alert(
+        'Unable to Add',
+        'We could not add this scholarship to your application tracker.'
+      );
+    } finally {
+      setTracking(false);
+    }
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>{name}</Text>
-
-      <Text style={styles.provider}>{provider}</Text>
-
-      <Text style={styles.award}>
-        ${awardAmount.toLocaleString()}
+    <View style={styles.container}>
+      <Text style={styles.name}>
+        {scholarship.name}
       </Text>
 
-      <Text style={styles.deadline}>
-        Deadline: {deadline}
-      </Text>
-
-      <Text style={styles.sectionTitle}>
-        Description
+      <Text style={styles.provider}>
+        {scholarship.provider}
       </Text>
 
       <Text style={styles.description}>
-        {description}
+        {scholarship.description}
       </Text>
 
-      <Text style={styles.scholarshipId}>
-        Scholarship ID: {scholarshipId}
+      <Text style={styles.amount}>
+        Award Amount: ${scholarship.awardAmount}
       </Text>
 
-      <Button
-        title="Save Scholarship"
-        onPress={handleSaveScholarship}
-      />
-    </ScrollView>
+      <Text style={styles.deadline}>
+        Deadline: {scholarship.deadline}
+      </Text>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSave}
+        disabled={saving}
+      >
+        <Text style={styles.buttonText}>
+          {saving ? 'Saving...' : 'Save Scholarship'}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleTrackApplication}
+        disabled={tracking}
+      >
+        <Text style={styles.buttonText}>
+          {tracking
+            ? 'Adding...'
+            : 'Track Application'}
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    padding: 24,
+    padding: 20,
   },
 
-  title: {
-    fontSize: 32,
+  name: {
+    fontSize: 26,
     fontWeight: 'bold',
     marginBottom: 8,
   },
 
   provider: {
     fontSize: 18,
-    marginBottom: 20,
+    marginBottom: 16,
   },
 
-  award: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 12,
+  description: {
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+
+  amount: {
+    fontSize: 17,
+    fontWeight: '600',
+    marginBottom: 8,
   },
 
   deadline: {
@@ -121,20 +149,16 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 8,
+  button: {
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    alignItems: 'center',
+    marginBottom: 12,
   },
 
-  description: {
+  buttonText: {
     fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 24,
-  },
-
-  scholarshipId: {
-    fontSize: 14,
-    marginBottom: 20,
+    fontWeight: 'bold',
   },
 });
