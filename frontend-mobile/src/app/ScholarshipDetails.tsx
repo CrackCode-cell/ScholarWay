@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import {
   Alert,
   StyleSheet,
@@ -23,6 +24,8 @@ export default function ScholarshipDetails({
 
   const studentId = 1;
 
+  const requirements = scholarship.requirements;
+
   async function handleSave() {
     try {
       setSaving(true);
@@ -34,7 +37,7 @@ export default function ScholarshipDetails({
 
       Alert.alert(
         'Scholarship Saved',
-        `${scholarship.name} has been saved.`
+        `${scholarship.name} has been added to your saved scholarships.`
       );
     } catch (error) {
       Alert.alert(
@@ -69,6 +72,18 @@ export default function ScholarshipDetails({
     }
   }
 
+  function formatScholarshipType() {
+    if (scholarship.scholarshipType === 'MERIT_AND_NEED') {
+      return 'Merit + Need Based';
+    }
+
+    if (scholarship.scholarshipType === 'NEED_BASED') {
+      return 'Need Based';
+    }
+
+    return 'Merit Based';
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.name}>
@@ -79,17 +94,88 @@ export default function ScholarshipDetails({
         {scholarship.provider}
       </Text>
 
-      <Text style={styles.description}>
-        {scholarship.description}
-      </Text>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          Scholarship Information
+        </Text>
 
-      <Text style={styles.amount}>
-        Award Amount: ${scholarship.awardAmount}
-      </Text>
+        <Text>
+          Type: {formatScholarshipType()}
+        </Text>
 
-      <Text style={styles.deadline}>
-        Deadline: {scholarship.deadline}
-      </Text>
+        <Text>
+          Award: ${scholarship.awardAmount}
+        </Text>
+
+        <Text>
+          Deadline: {scholarship.deadline}
+        </Text>
+
+        <Text>
+          Status: {scholarship.status}
+        </Text>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          Description
+        </Text>
+
+        <Text style={styles.description}>
+          {scholarship.description}
+        </Text>
+      </View>
+
+      {requirements && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Requirements
+          </Text>
+
+          {requirements.minimumGpa !== null && (
+            <Text>
+              Minimum GPA: {requirements.minimumGpa}
+            </Text>
+          )}
+
+          {requirements.major && (
+            <Text>
+              Major: {requirements.major}
+            </Text>
+          )}
+
+          {requirements.location && (
+            <Text>
+              Location: {requirements.location}
+            </Text>
+          )}
+
+          {requirements.financialNeedRequired !== null && (
+            <Text>
+              Financial Need Required:{' '}
+              {requirements.financialNeedRequired
+                ? 'Yes'
+                : 'No'}
+            </Text>
+          )}
+
+          {requirements.fafsaRequired !== null && (
+            <Text>
+              FAFSA Required:{' '}
+              {requirements.fafsaRequired
+                ? 'Yes'
+                : 'No'}
+            </Text>
+          )}
+
+          {requirements.requiredActivity && (
+            <Text>
+              Required Activity:{' '}
+              {requirements.requiredActivity}
+            </Text>
+          )}
+        </View>
+      )}
 
       <TouchableOpacity
         style={styles.button}
@@ -97,7 +183,9 @@ export default function ScholarshipDetails({
         disabled={saving}
       >
         <Text style={styles.buttonText}>
-          {saving ? 'Saving...' : 'Save Scholarship'}
+          {saving
+            ? 'Saving...'
+            : 'Save Scholarship'}
         </Text>
       </TouchableOpacity>
 
@@ -122,37 +210,38 @@ const styles = StyleSheet.create({
   },
 
   name: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 8,
   },
 
   provider: {
     fontSize: 18,
+    marginBottom: 20,
+  },
+
+  section: {
+    padding: 16,
+    borderWidth: 1,
+    borderRadius: 10,
     marginBottom: 16,
+  },
+
+  sectionTitle: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
 
   description: {
     fontSize: 16,
     lineHeight: 24,
-    marginBottom: 16,
-  },
-
-  amount: {
-    fontSize: 17,
-    fontWeight: '600',
-    marginBottom: 8,
-  },
-
-  deadline: {
-    fontSize: 16,
-    marginBottom: 24,
   },
 
   button: {
     padding: 15,
-    borderRadius: 10,
     borderWidth: 1,
+    borderRadius: 10,
     alignItems: 'center',
     marginBottom: 12,
   },
