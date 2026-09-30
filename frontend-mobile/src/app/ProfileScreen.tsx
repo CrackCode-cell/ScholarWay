@@ -1,53 +1,113 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
+  ActivityIndicator,
   Alert,
-  Button,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
-import { createStudent } from '@/services/studentService';
+import {
+  getStudent,
+  updateStudent,
+} from '../services/studentService';
+
+import { Student } from '../types/Student';
 
 export default function ProfileScreen() {
+  const studentId = 1;
+
+  const [student, setStudent] =
+    useState<Student | null>(null);
+
   const [name, setName] = useState('');
   const [gpa, setGpa] = useState('');
   const [major, setMajor] = useState('');
   const [interests, setInterests] = useState('');
   const [location, setLocation] = useState('');
-  const [financialNeed, setFinancialNeed] = useState('');
-  const [fafsaCompleted, setFafsaCompleted] = useState('');
+  const [financialNeed, setFinancialNeed] =
+    useState('');
+  const [fafsaCompleted, setFafsaCompleted] =
+    useState('');
   const [activities, setActivities] = useState('');
 
-  async function handleSaveProfile() {
-    if (name.trim() === '') {
-      Alert.alert('Error', 'Please enter your name.');
-      return;
-    }
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-    const gpaNumber = Number(gpa);
+  useEffect(() => {
+    loadStudent();
+  }, []);
 
-    if (
-      gpa === '' ||
-      gpaNumber < 0 ||
-      gpaNumber > 4
-    ) {
+  async function loadStudent() {
+    try {
+      setLoading(true);
+
+      const data = await getStudent(studentId);
+
+      setStudent(data);
+
+      setName(data.name);
+      setGpa(data.gpa.toString());
+      setMajor(data.major);
+      setInterests(data.interests);
+      setLocation(data.location);
+      setFinancialNeed(
+        data.financialNeed ? 'yes' : 'no'
+      );
+      setFafsaCompleted(
+        data.fafsaCompleted ? 'yes' : 'no'
+      );
+      setActivities(data.activities);
+    } catch (error) {
       Alert.alert(
-        'Error',
-        'Please enter a GPA between 0 and 4.'
+        'Unable to Load Profile',
+        'We could not load your student profile.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSave() {
+    const parsedGpa = Number(gpa);
+
+    if (!name.trim()) {
+      Alert.alert(
+        'Invalid Profile',
+        'Please enter your name.'
       );
       return;
     }
 
-    if (major.trim() === '') {
-      Alert.alert('Error', 'Please enter your major.');
+    if (
+      Number.isNaN(parsedGpa) ||
+      parsedGpa < 0 ||
+      parsedGpa > 4
+    ) {
+      Alert.alert(
+        'Invalid GPA',
+        'GPA must be between 0 and 4.'
+      );
       return;
     }
 
-    if (location.trim() === '') {
-      Alert.alert('Error', 'Please enter your location.');
+    if (!major.trim()) {
+      Alert.alert(
+        'Invalid Profile',
+        'Please enter your major.'
+      );
+      return;
+    }
+
+    if (!location.trim()) {
+      Alert.alert(
+        'Invalid Profile',
+        'Please enter your location.'
+      );
       return;
     }
 
@@ -56,8 +116,8 @@ export default function ProfileScreen() {
       financialNeed !== 'no'
     ) {
       Alert.alert(
-        'Error',
-        'Please enter yes or no for financial need.'
+        'Invalid Financial Need',
+        'Enter yes or no.'
       );
       return;
     }
@@ -67,149 +127,245 @@ export default function ProfileScreen() {
       fafsaCompleted !== 'no'
     ) {
       Alert.alert(
-        'Error',
-        'Please enter yes or no for FAFSA completion.'
+        'Invalid FAFSA Status',
+        'Enter yes or no.'
       );
       return;
     }
 
     try {
-      const student = await createStudent({
-        name,
-        gpa: gpaNumber,
-        major,
-        interests,
-        location,
-        financialNeed: financialNeed === 'yes',
-        fafsaCompleted: fafsaCompleted === 'yes',
-        activities,
-      });
+      setSaving(true);
+
+      const updatedStudent = {
+        name: name.trim(),
+        gpa: parsedGpa,
+        major: major.trim(),
+        interests: interests.trim(),
+        location: location.trim(),
+        financialNeed:
+          financialNeed === 'yes',
+        fafsaCompleted:
+          fafsaCompleted === 'yes',
+        activities: activities.trim(),
+      };
+
+      const data = await updateStudent(
+        studentId,
+        updatedStudent
+      );
+
+      setStudent(data);
 
       Alert.alert(
-        'Profile Saved',
-        `Welcome, ${student.name}!`
+        'Profile Updated',
+        'Your ScholarWay profile has been updated.'
       );
     } catch (error) {
       Alert.alert(
-        'Error',
-        'Unable to save your profile.'
+        'Unable to Save',
+        'We could not update your profile.'
       );
+    } finally {
+      setSaving(false);
     }
   }
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Student Profile</Text>
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
 
-      <Text style={styles.subtitle}>
-        Tell ScholarWay about yourself so we can
-        personalize your scholarship matches.
+        <Text>
+          Loading your profile...
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+    >
+      <Text style={styles.title}>
+        Student Profile
       </Text>
 
-      <Text style={styles.label}>Name</Text>
+      <Text style={styles.subtitle}>
+        Keep your information updated so ScholarWay
+        can personalize your scholarship matches.
+      </Text>
+
+      <Text style={styles.label}>
+        Name
+      </Text>
+
       <TextInput
-        style={styles.input}
         value={name}
         onChangeText={setName}
-        placeholder="Enter your name"
+        style={styles.input}
+        placeholder="Your name"
       />
 
-      <Text style={styles.label}>GPA</Text>
+      <Text style={styles.label}>
+        GPA
+      </Text>
+
       <TextInput
-        style={styles.input}
         value={gpa}
         onChangeText={setGpa}
-        placeholder="Enter your GPA"
+        style={styles.input}
+        placeholder="0.0 - 4.0"
         keyboardType="decimal-pad"
       />
 
-      <Text style={styles.label}>Major</Text>
+      <Text style={styles.label}>
+        Major
+      </Text>
+
       <TextInput
-        style={styles.input}
         value={major}
         onChangeText={setMajor}
-        placeholder="Enter your major"
+        style={styles.input}
+        placeholder="Computer Engineering"
       />
 
-      <Text style={styles.label}>Interests</Text>
+      <Text style={styles.label}>
+        Interests
+      </Text>
+
       <TextInput
-        style={[styles.input, styles.multilineInput]}
         value={interests}
         onChangeText={setInterests}
-        placeholder="Example: AI, cybersecurity, hardware"
-        multiline
+        style={styles.input}
+        placeholder="AI, hardware, cybersecurity..."
       />
 
-      <Text style={styles.label}>Location</Text>
+      <Text style={styles.label}>
+        Location
+      </Text>
+
       <TextInput
-        style={styles.input}
         value={location}
         onChangeText={setLocation}
-        placeholder="Example: Washington"
+        style={styles.input}
+        placeholder="Washington"
       />
 
-      <Text style={styles.label}>Financial Need</Text>
+      <Text style={styles.label}>
+        Financial Need
+      </Text>
+
       <TextInput
-        style={styles.input}
         value={financialNeed}
         onChangeText={setFinancialNeed}
-        placeholder="Enter yes or no"
+        style={styles.input}
+        placeholder="yes or no"
         autoCapitalize="none"
       />
 
-      <Text style={styles.label}>FAFSA Completed</Text>
+      <Text style={styles.label}>
+        FAFSA Completed
+      </Text>
+
       <TextInput
-        style={styles.input}
         value={fafsaCompleted}
         onChangeText={setFafsaCompleted}
-        placeholder="Enter yes or no"
+        style={styles.input}
+        placeholder="yes or no"
         autoCapitalize="none"
       />
 
-      <Text style={styles.label}>Activities</Text>
+      <Text style={styles.label}>
+        Activities
+      </Text>
+
       <TextInput
-        style={[styles.input, styles.multilineInput]}
         value={activities}
         onChangeText={setActivities}
-        placeholder="Example: Chess, CyberPatriot, Math Club"
+        style={[
+          styles.input,
+          styles.multilineInput,
+        ]}
+        placeholder="Clubs, leadership, volunteering..."
         multiline
       />
 
-      <Button
-        title="Save Profile"
-        onPress={handleSaveProfile}
-      />
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSave}
+        disabled={saving}
+      >
+        <Text style={styles.buttonText}>
+          {saving
+            ? 'Saving...'
+            : student
+              ? 'Save Profile'
+              : 'Create Profile'}
+        </Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    padding: 24,
+    flex: 1,
   },
+
+  content: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
+    marginBottom: 8,
   },
+
   subtitle: {
-    fontSize: 16,
-    marginTop: 8,
+    fontSize: 15,
+    lineHeight: 22,
     marginBottom: 24,
   },
+
   label: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '600',
     marginBottom: 6,
   },
+
   input: {
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 12,
-    marginBottom: 20,
+    marginBottom: 16,
+    fontSize: 16,
   },
+
   multilineInput: {
     minHeight: 100,
     textAlignVertical: 'top',
+  },
+
+  button: {
+    padding: 15,
+    borderWidth: 1,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
