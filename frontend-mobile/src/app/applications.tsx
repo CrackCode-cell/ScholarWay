@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import {
   ActivityIndicator,
   FlatList,
@@ -8,13 +9,16 @@ import {
 } from 'react-native';
 
 import ApplicationCard from '../components/ApplicationCard';
+
 import { getApplications } from '../services/applicationService';
-import { ScholarshipApplication } from '../types/ScholarshipApplication';
+
+import {
+  ScholarshipApplication,
+} from '../types/ScholarshipApplication';
 
 export default function ApplicationsScreen() {
-  const [applications, setApplications] = useState<
-    ScholarshipApplication[]
-  >([]);
+  const [applications, setApplications] =
+    useState<ScholarshipApplication[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,7 +38,9 @@ export default function ApplicationsScreen() {
 
       setApplications(data);
     } catch (error) {
-      setError('Unable to load your applications.');
+      setError(
+        'Unable to load your applications.'
+      );
     } finally {
       setLoading(false);
     }
@@ -44,7 +50,10 @@ export default function ApplicationsScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" />
-        <Text>Loading your applications...</Text>
+
+        <Text>
+          Loading your applications...
+        </Text>
       </View>
     );
   }
@@ -63,13 +72,21 @@ export default function ApplicationsScreen() {
         Application Tracker
       </Text>
 
+      <Text style={styles.subtitle}>
+        Track your scholarship applications from
+        planning through completion.
+      </Text>
+
       <FlatList
         data={applications}
         keyExtractor={(item) =>
           item.applicationId.toString()
         }
         renderItem={({ item }) => (
-          <ApplicationCard application={item} />
+          <ApplicationCard
+            application={item}
+            onChanged={loadApplications}
+          />
         )}
         ListEmptyComponent={
           <Text style={styles.empty}>
@@ -95,8 +112,14 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: 'bold',
+    marginBottom: 8,
+  },
+
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 22,
     marginBottom: 20,
   },
 
