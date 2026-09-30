@@ -1,36 +1,36 @@
-import { Scholarship } from '../types/Scholarship';
+import { Scholarship, ScholarshipType } from '../types/Scholarship';
 
-const API_URL =
-  'http://localhost:8080/api/scholarships';
+const API_URL = 'http://localhost:8080/api/scholarships';
 
-export async function getScholarships(): Promise<
-  Scholarship[]
-> {
-  const response = await fetch(API_URL);
-
+async function handleResponse(
+  response: Response,
+  message: string
+) {
   if (!response.ok) {
-    throw new Error(
-      `Failed to fetch scholarships. Status: ${response.status}`
-    );
+    throw new Error(message);
   }
 
   return response.json();
 }
 
+export async function getScholarships(): Promise<Scholarship[]> {
+  const response = await fetch(API_URL);
+
+  return handleResponse(
+    response,
+    'Unable to load scholarships.'
+  );
+}
+
 export async function getScholarshipById(
   id: number
 ): Promise<Scholarship> {
-  const response = await fetch(
-    `${API_URL}/${id}`
+  const response = await fetch(`${API_URL}/${id}`);
+
+  return handleResponse(
+    response,
+    'Unable to load scholarship.'
   );
-
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch scholarship. Status: ${response.status}`
-    );
-  }
-
-  return response.json();
 }
 
 export async function searchScholarships(
@@ -40,17 +40,14 @@ export async function searchScholarships(
     `${API_URL}/search?name=${encodeURIComponent(name)}`
   );
 
-  if (!response.ok) {
-    throw new Error(
-      `Failed to search scholarships. Status: ${response.status}`
-    );
-  }
-
-  return response.json();
+  return handleResponse(
+    response,
+    'Unable to search scholarships.'
+  );
 }
 
 export async function getScholarshipsByType(
-  scholarshipType: string
+  scholarshipType: ScholarshipType
 ): Promise<Scholarship[]> {
   const response = await fetch(
     `${API_URL}/type?scholarshipType=${encodeURIComponent(
@@ -58,11 +55,44 @@ export async function getScholarshipsByType(
     )}`
   );
 
-  if (!response.ok) {
-    throw new Error(
-      `Failed to filter scholarships. Status: ${response.status}`
+  return handleResponse(
+    response,
+    'Unable to filter scholarships.'
+  );
+}
+
+export async function filterScholarships(
+  name?: string,
+  status?: string,
+  scholarshipType?: ScholarshipType
+): Promise<Scholarship[]> {
+  const params = new URLSearchParams();
+
+  if (name?.trim()) {
+    params.append('name', name.trim());
+  }
+
+  if (status?.trim()) {
+    params.append('status', status.trim());
+  }
+
+  if (scholarshipType) {
+    params.append(
+      'scholarshipType',
+      scholarshipType
     );
   }
 
-  return response.json();
+  const query = params.toString();
+
+  const url = query
+    ? `${API_URL}/filter?${query}`
+    : API_URL;
+
+  const response = await fetch(url);
+
+  return handleResponse(
+    response,
+    'Unable to filter scholarships.'
+  );
 }
