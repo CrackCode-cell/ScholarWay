@@ -75,3 +75,22 @@ Planned improvements include:
 - Application reminders
 - Improved recommendation systems
 - Testing and deployment
+
+## Testing Status
+
+The ScholarWay MVP feature set is complete and the project is now entering the testing and validation phase.
+
+Testing will cover:
+
+- Backend startup and database connectivity
+- Scholarship API endpoints
+- Student profile creation and updates
+- Scholarship search and filtering
+- Eligibility and matching logic
+- Saved scholarships
+- Application tracking
+- Dashboard data
+- React Native frontend integration
+- End-to-end student workflows
+
+Issues discovered during testing will be fixed and retested before the MVP is considered fully validated.
